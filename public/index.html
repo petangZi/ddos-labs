@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>DDoS Lab</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body style="text-align:center;font-family:sans-serif;padding:30px;">
+  <h2>DDoS Test Live Hits</h2>
+  <canvas id="chart" width="800" height="400"></canvas>
+
+  <script>
+    const ctx = document.getElementById("chart").getContext("2d");
+    const chart = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: [],
+        datasets: [{
+          label: "Hits/s",
+          data: [],
+          borderColor: "red",
+          fill: false
+        }]
+      },
+      options: { animation: false }
+    });
+
+    setInterval(async () => {
+      const res = await fetch("/data");
+      const json = await res.json();
+      chart.data.labels.push(new Date().toLocaleTimeString());
+      chart.data.datasets[0].data.push(json.hits);
+      if (chart.data.labels.length > 20) {
+        chart.data.labels.shift();
+        chart.data.datasets[0].data.shift();
+      }
+      chart.update();
+    }, 1000);
+  </script>
+</body>
+</html>
